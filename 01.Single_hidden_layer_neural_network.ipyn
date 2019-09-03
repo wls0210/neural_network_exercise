@@ -1,0 +1,73 @@
+# ////////////////////////////////////////////
+# / Single hidden layer neural network       /
+# / Date: 2019-07-02                         /
+# / ---------------------------------------- /
+# / Input: 2 information (T/F)               /
+# / Hidden layer: 10 feature (relu)          /
+# / Output layer: 3 prediction (softmax)     /
+# / Cost func: Cross entropy                 /
+# / Optimizer: Adam                          /
+# ////////////////////////////////////////////
+
+import tensorflow as tf
+import numpy as np
+
+# training input
+x_data = np.array(
+            [[0, 0], [1, 0], [1, 1], [0, 0], [0, 0], [0, 1]])
+
+# training label
+y_data = np.array([
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, 1],
+            [1, 0, 0],
+            [1, 0, 0],
+            [0, 0, 1]])
+
+# data io place holder
+X = tf.placeholder(tf.float32)
+Y = tf.placeholder(tf.float32)
+
+# weight and bias of hidden layer 
+W1 = tf.Variable(tf.random_uniform([2, 10], -1., 1.))
+b1 = tf.Variable(tf.zeros([10]))
+
+# hidden layer
+L1 = tf.add(tf.matmul(X, W1), b1)
+L1 = tf.nn.relu(L1)
+
+# weight and bias of output layer
+W2 = tf.Variable(tf.random_uniform([10, 3], -1., 1.))
+b2 = tf.Variable(tf.zeros([3]))
+
+# output layer
+model = tf.add(tf.matmul(L1, W2), b2)
+
+# cost function
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=Y, logits=model))
+
+# set optimizer
+optimizer = tf.train.AdamOptimizer(learning_rate = 0.01)
+train_op = optimizer.minimize(cost)
+
+# initialize session
+init = tf.global_variables_initializer()
+sess = tf.Session()
+sess.run(init)
+
+# learning
+for step in range(100):
+    sess.run(train_op, feed_dict = {X:x_data, Y:y_data})
+    
+    # inform learning process
+    if (step) % 10 == 0:
+        print("Step:", step, "Cost:", sess.run(cost, feed_dict = {X:x_data, Y:y_data}))
+    
+# prediction model
+prediction = tf.argmax(model, axis = 1)
+target = tf.argmax(Y, axis = 1)
+
+# print learning result
+print("\nPrediction :", sess.run(prediction, feed_dict = {X:x_data}))
+print("Target     :", sess.run(target, feed_dict = {Y:y_data}))
