@@ -1,6 +1,7 @@
 # ////////////////////////////////////////////////////////
 # / MNIST 2 hidden layer ANN                             /
 # / Date: 2019-07-13                                     /
+# / Author: Park Seungjin                                /
 # / ---------------------------------------------------- /
 # / Input layer: 28*28 vector (MNIST image)              /
 # / Hidden layer1: 256 feature (relu)                    /
