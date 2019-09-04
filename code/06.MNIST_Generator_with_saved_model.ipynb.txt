@@ -1,0 +1,85 @@
+# ////////////////////////////////////////////////////////
+# / MNIST Generator with saved model                     /
+# / Date: 2019-07-23                                     /
+# / Author: Park Seungjin                                /
+# / ---------------------------------------------------- /
+# / Load saved model and generate num image as input num /
+# ////////////////////////////////////////////////////////
+
+import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
+
+tf.reset_default_graph()
+
+n_noise = 128
+n_hidden = 256
+n_input = 28*28
+print("Input NUM:")
+my_num = int(input())
+
+Z = tf.placeholder(tf.float32, [None, 128])
+Y = tf.placeholder(tf.float32, [None, 10])
+
+def one_hot(num):
+    cnt = 0
+    _num= num
+    
+    while _num > 1:
+        cnt = cnt + 1
+        _num = _num / 10
+        
+    data = [[0]*10 for step in range(cnt)]
+        
+    for step in range(cnt):
+        tmp = int(num % 10)
+        data[cnt - step - 1][tmp] = 1
+        num = num / 10
+    
+    return cnt, data 
+
+def to_arr(num):
+    cnt = 0
+    arr = []    
+    while num > 1:
+        cnt = cnt + 1
+        tmp = int(num % 10)
+        num = num / 10
+        arr.append(tmp)
+    return cnt, arr
+
+my_size, my_data = one_hot(my_num)
+
+def generator(noise, labels):
+    with tf.variable_scope('generator'):
+        inputs = tf.concat([noise, labels], 1)
+        hidden = tf.layers.dense(inputs, n_hidden, activation = tf.nn.relu)
+        output = tf.layers.dense(hidden, n_input, activation = tf.nn.sigmoid)
+    return output
+
+def get_noise(my_size, n_noise):
+    return np.random.uniform(-1., 1., size = [my_size, n_noise])
+    
+G = generator(Z, Y)
+
+sess = tf.Session()
+saver = tf.train.Saver(tf.global_variables())
+
+ckpt = tf.train.get_checkpoint_state('./GAN_model')
+if ckpt and tf.train.checkpoint_exists(ckpt.model_checkpoint_path):
+    saver.restore(sess, ckpt.model_checkpoint_path)
+
+    noise = get_noise(my_size, n_noise)
+    samples = sess.run(G, feed_dict = {Z: noise, Y:my_data})
+
+    fig, ax = plt.subplots(1, my_size, figsize = (my_size, 1))
+
+    _, arr = to_arr(my_num)
+
+    for i in range(my_size):
+        ax[i].set_axis_off()           
+        ax[i].imshow(np.reshape(samples[i], (28, 28)))
+        ax[i].set_title(arr[my_size - i - 1])
+    plt.show()
+else :
+    print("learned model doesn't exist")
