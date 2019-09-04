@@ -1,6 +1,7 @@
 # ////////////////////////////////////////////
 # / Single hidden layer neural network       /
 # / Date: 2019-07-02                         /
+# / Author: Park Seungjin                    /
 # / ---------------------------------------- /
 # / Input: 2 information (T/F)               /
 # / Hidden layer: 10 feature (relu)          /
